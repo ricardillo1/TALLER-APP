@@ -79,9 +79,8 @@ class MainActivity : AppCompatActivity() {
             webView.loadUrl(lastUrl)
         }
 
-        swipe.setOnRefreshListener { webView.reload() }
-        // Solo permite "jalar para recargar" cuando la página está arriba del todo.
-        swipe.setOnChildScrollUpCallback { _, _ -> webView.scrollY > 0 }
+        // Sin "jalar para recargar": el sistema se desplaza con normalidad y no vuelve al Panel.
+        swipe.isEnabled = false
 
         with(webView.settings) {
             javaScriptEnabled = true
@@ -206,15 +205,33 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Botón "atrás" navega dentro de la web; si no hay historial, cierra la app.
+        // Botón "atrás":
+        // 1) si la web define window.onAndroidBack() y devuelve true, ella lo maneja;
+        // 2) si hay historial del navegador, retrocede;
+        // 3) si no, hay que presionar "atrás" dos veces seguidas para salir.
+        var lastBackPress = 0L
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    hadError = false
-                    webView.goBack()
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
+                val js = "(function(){try{return typeof window.onAndroidBack==='function'" +
+                    " ? (window.onAndroidBack()===true) : false;}catch(e){return false;}})()"
+                webView.evaluateJavascript(js) { result ->
+                    if (result == "true") return@evaluateJavascript
+                    if (webView.canGoBack()) {
+                        hadError = false
+                        webView.goBack()
+                        return@evaluateJavascript
+                    }
+                    val now = System.currentTimeMillis()
+                    if (now - lastBackPress < 2000) {
+                        finish()
+                    } else {
+                        lastBackPress = now
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Presiona atrás otra vez para salir",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
         })
