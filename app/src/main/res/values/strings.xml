@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Taller</string>
+    <string name="sin_conexion">Sin conexión</string>
+    <string name="sin_conexion_detalle">No se pudo cargar el sistema. Revisa tu internet e inténtalo de nuevo.</string>
+    <string name="reintentar">Reintentar</string>
+</resources>

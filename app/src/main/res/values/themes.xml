@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.Taller" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/primario</item>
+        <item name="colorPrimaryDark">@color/primario_oscuro</item>
+        <item name="colorAccent">@color/primario</item>
+        <item name="android:statusBarColor">@color/primario_oscuro</item>
+    </style>
+</resources>
